@@ -1,0 +1,111 @@
+version: "3.9"
+
+
+networks:
+  gateway:
+    external: true
+  backend:
+
+
+secrets:
+  account-env:
+    external: true
+  inventory-env:
+    external: true
+  order-env:
+    external: true
+
+
+services:
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - backend
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [ node.role == manager ]
+
+  redis:
+    image: redis:6.0
+    volumes:
+      - redis-data:/data
+    networks:
+      - backend
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  order:
+    image: microservice-demo_order:latest
+    networks:
+      - backend
+      - gateway
+    depends_on:
+      - mysql
+      - redis
+    secrets:
+      - source: order-env
+        target: /opt/www/.env
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.order.rule=PathPrefix(`/order`)
+        - traefik.http.routers.order.entryPoints=web
+        - traefik.http.routers.order.service=order
+        - traefik.http.services.order.loadbalancer.server.port=9501
+        - traefik.docker.network=gateway
+
+  account:
+    image: microservice-demo_account:latest
+    networks:
+      - backend
+      - gateway
+    depends_on:
+      - mysql
+      - redis
+    secrets:
+      - source: account-env
+        target: /opt/www/.env
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+      restart_policy:
+        condition: on-failure
+
+  inventory:
+    image: microservice-demo_inventory:latest
+    networks:
+      - backend
+      - gateway
+    depends_on:
+      - mysql
+      - redis
+    secrets:
+      - source: inventory-env
+        target: /opt/www/.env
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+      restart_policy:
+        condition: on-failure
+
+
+volumes:
+  mysql-data:
+  redis-data:

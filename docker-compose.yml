@@ -1,0 +1,59 @@
+version: "3"
+
+
+networks:
+  backend:
+
+
+services:
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - mysql-data:/var/lib/mysql
+    expose:
+      - 3306
+    networks:
+      - backend
+
+  redis:
+    image: redis:6.0
+    volumes:
+      - redis-data:/data
+    networks:
+      - backend
+
+  order:
+    build:
+      context: ./order
+    tty: true
+    volumes:
+      - ./:/workspace
+    networks:
+      - backend
+    ports:
+      - 9501:9501
+
+  account:
+    build:
+      context: ./account
+    tty: true
+    volumes:
+      - ./:/workspace
+    networks:
+      - backend
+
+  inventory:
+    build:
+      context: ./inventory
+    tty: true
+    volumes:
+      - ./:/workspace
+    networks:
+      - backend
+
+volumes:
+  mysql-data:
+  redis-data:
