@@ -2,6 +2,11 @@
 
 基于 Hyperf 的微服务 demo
 
+通过本 demo 可以学习以下内容：
+- 如果基于 Hyperf 构建微服务
+- 如何把 traefik 用于微服务网关
+- 如何使用 docker swarm 部署微服务
+
 # 整体架构
 
 ![microservice-demo](./others/microservice-demo.svg)
@@ -159,5 +164,16 @@ php bin/hyperf.php migrate
 用 postman 测试
 
 ![postman](./others/postman.png)
+
+# TODO
+
+- K8S 
+- 分布式事务
+
+# 参考
+
+- [Hyperf 官方文档](https://hyperf.wiki/2.0/#/)
+- [Traefik 官方文档](https://doc.traefik.io/traefik/)
+- [Docker Swarm](https://docs.docker.com/engine/swarm/)
 
 
